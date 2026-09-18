@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="ココナラ公開プロフィールをURLから確認する分析ツール" />
+    <title>ココナラ分析ツール</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ffffff'/%3E%3Cpath d='M10 33c8-16 16 16 24 0s16 16 20 0' fill='none' stroke='%23ef6ca8' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M10 28c8-16 16 16 24 0s16 16 20 0' fill='none' stroke='%236d5dfc' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">COCONALA / PUBLIC PAGE ANALYZER</p>
+          <h1>ココナラ分析ツール</h1>
+        </div>
+        <div class="status-pill"><span class="status-dot"></span>APIなし・公開ページ</div>
+      </header>
+
+      <section class="control-panel" aria-labelledby="target-heading">
+        <div class="control-copy">
+          <p class="section-kicker">分析対象</p>
+          <h2 id="target-heading">店舗URLを入力</h2>
+          <p>プロフィールURLまたはサービスURLを指定すると、公開情報を読み取って整理します。</p>
+        </div>
+        <form id="analyze-form" class="url-form">
+          <label for="url-input">ココナラURL</label>
+          <div class="input-row">
+            <input id="url-input" name="url" type="url" value="" placeholder="https://coconala.com/users/..." autocomplete="url" required />
+            <button id="analyze-button" type="submit">分析する</button>
+          </div>
+          <p id="form-message" class="form-message" role="status"></p>
+        </form>
+      </section>
+
+      <section id="empty-state" class="empty-state">
+        <div class="empty-mark">↗</div>
+        <h2>URLを分析すると、ここに結果が表示されます</h2>
+        <p>分析したいココナラのプロフィールURLを入力してください。</p>
+      </section>
+
+      <section id="results" class="results" hidden>
+        <div class="result-heading">
+          <div>
+            <p class="section-kicker">公開プロフィール</p>
+            <h2 id="profile-name">—</h2>
+            <p id="source-url" class="source-url">—</p>
+          </div>
+          <div id="fetched-at" class="fetched-at">—</div>
+        </div>
+
+        <div class="kpi-grid" aria-label="公開の数字">
+          <article class="kpi-card"><span>販売実績</span><strong id="sales-total">—</strong><small>公開値</small></article>
+          <article class="kpi-card"><span>評価</span><strong id="rating">—</strong><small>公開値</small></article>
+          <article class="kpi-card"><span>フォロワー</span><strong id="followers">—</strong><small>公開値</small></article>
+          <article class="kpi-card"><span>出品サービス</span><strong id="service-count">—</strong><small>公開一覧</small></article>
+          <article class="kpi-card"><span>出品コンテンツ</span><strong id="content-count">—</strong><small>公開一覧</small></article>
+        </div>
+
+        <section class="strategy-panel" aria-labelledby="strategy-heading">
+          <div class="strategy-heading">
+            <div>
+              <p class="section-kicker">戦略分析</p>
+              <h2 id="strategy-heading">数字の先にある、次の一手</h2>
+              <p class="strategy-lead">公開されている事実と推測を分けて、商品と次の行動までつなぎます。</p>
+              <p id="strategy-verdict" class="strategy-verdict">—</p>
+            </div>
+            <span class="strategy-badge">分析から見えた仮説</span>
+          </div>
+          <div class="strategy-grid">
+            <article class="strategy-card positioning-card">
+              <div class="card-label">01 / 誰向けか</div>
+              <h3 id="positioning-flag">—</h3>
+              <dl class="strategy-details">
+                <div><dt>相手</dt><dd id="positioning-tribe">—</dd></div>
+                <div><dt>起こす変化</dt><dd id="positioning-change">—</dd></div>
+              </dl>
+              <p class="evidence" id="positioning-evidence">—</p>
+            </article>
+            <article class="strategy-card portfolio-card">
+              <div class="card-label">02 / 商品構成</div>
+              <div id="portfolio-mix" class="mix-list"></div>
+              <p id="portfolio-observation" class="strategy-copy">—</p>
+              <p id="portfolio-interpretation" class="strategy-copy emphasis">—</p>
+              <p class="evidence" id="portfolio-evidence">—</p>
+            </article>
+            <article class="strategy-card funnel-card">
+              <div class="card-label">03 / お客さんが買うまで</div>
+              <h3 id="funnel-hole">—</h3>
+              <p id="funnel-why" class="strategy-copy">—</p>
+              <div id="funnel-stages" class="funnel-stages"></div>
+              <p class="next-measurement"><span>次に測る：</span><span id="funnel-measurement">—</span></p>
+            </article>
+          </div>
+          <article class="decision-card">
+            <div class="card-label">まず決めること</div>
+            <h3 id="decision-title">—</h3>
+            <p id="decision-copy" class="strategy-copy">—</p>
+            <p id="decision-evidence" class="evidence">—</p>
+            <div id="decision-options" class="decision-options"></div>
+          </article>
+          <div class="actions-block">
+            <div class="actions-title">
+              <div>
+                <div class="card-label">04 / まずやること</div>
+                <span class="tiny-note">公開情報から考えられる行動を、1つずつ試します</span>
+              </div>
+            </div>
+            <div id="actions-list" class="actions-list"></div>
+          </div>
+          <p id="strategy-guardrail" class="strategy-guardrail">—</p>
+        </section>
+
+        <div class="content-grid">
+          <section class="panel service-panel">
+            <div class="panel-heading"><div><p class="section-kicker">サービス構成</p><h2>出品サービス</h2></div><span id="service-badge" class="count-badge">—</span></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>サービス名</th><th>価格</th><th>実績</th><th>評価</th></tr></thead>
+                <tbody id="services-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <aside class="panel next-step-panel">
+            <div class="panel-heading"><div><p class="section-kicker">公開情報の読み方</p><h2>ここだけでは分からないこと</h2></div></div>
+            <div class="next-step-highlight">
+              <p class="next-step-label">まず知っておくこと</p>
+              <h3 id="public-next-step-title">—</h3>
+              <p id="public-next-step-copy" class="next-step-copy">—</p>
+            </div>
+            <div class="next-step-measure">
+              <span>ログイン後に分かる数字</span>
+              <strong id="public-next-step-number">—</strong>
+            </div>
+            <a class="next-step-link" href="#login-heading">ログイン後の数字を見る</a>
+          </aside>
+        </div>
+
+        <section id="logged-results" class="logged-results" hidden>
+          <div class="result-heading">
+            <div>
+              <p class="section-kicker">ログイン後に確認できる数字</p>
+              <h2>サービスごとの流れ</h2>
+            </div>
+            <div id="logged-period" class="fetched-at">—</div>
+          </div>
+          <div class="logged-private-note">
+            <strong>公開ページとの違い</strong>
+            <p>公開ページは「これまでの販売実績」が中心です。ここでは、選んだ期間の「見られた回数 → お気に入り → 購入」の流れが分かります。</p>
+          </div>
+          <div class="logged-kpi-grid">
+            <article class="logged-kpi"><span>見られた回数</span><strong id="logged-views">—</strong></article>
+            <article class="logged-kpi"><span>この期間の購入数</span><strong id="logged-sales">—</strong></article>
+            <article class="logged-kpi"><span>お気に入りに入った数</span><strong id="logged-favorites">—</strong></article>
+            <article class="logged-kpi"><span>売上の目安</span><strong id="logged-revenue">—</strong></article>
+          </div>
+          <div class="logged-grid">
+            <section class="panel logged-service-panel">
+              <div class="panel-heading"><div><p class="section-kicker">サービス別</p><h2>どこで止まっているか</h2></div><span id="logged-service-badge" class="count-badge">—</span></div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>サービス名</th><th>見られた回数</th><th>お気に入り</th><th>購入数</th><th>見られて→購入</th><th>次に直す場所</th></tr></thead>
+                  <tbody id="logged-services-body"></tbody>
+                </table>
+              </div>
+            </section>
+            <aside class="panel diagnosis-panel">
+              <div class="panel-heading"><div><p class="section-kicker">判定</p><h2>次に確認する場所</h2></div></div>
+              <p id="logged-diagnosis" class="diagnosis-copy">—</p>
+              <div id="logged-actions" class="logged-actions"></div>
+              <div id="logged-limitations" class="limitations"></div>
+            </aside>
+          </div>
+        </section>
+      </section>
+
+      <section class="login-panel" aria-labelledby="login-heading" hidden>
+        <div class="login-copy">
+          <p class="section-kicker">さらに詳しく見る</p>
+          <h2 id="login-heading">ログイン後の数字で、見られ方を調べる</h2>
+          <p>公開ページでは分からない「期間内に何回見られたか」「お気に入りに入ったか」「購入につながったか」を、サービスごとに確認できます。</p>
+          <ol class="login-steps">
+            <li>起動時に開く専用ブラウザでココナラに手動ログイン</li>
+            <li>ログインしたまま、下のボタンを押す</li>
+          </ol>
+        </div>
+        <div class="login-action">
+          <button id="login-analyze-button" type="button" class="secondary-button">ログイン後の数字も見る</button>
+          <p id="login-message" class="form-message" role="status">専用ブラウザが起動していない場合は、起動.cmd をもう一度実行してください。</p>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/app.mjs"></script>
+  </body>
+</html>

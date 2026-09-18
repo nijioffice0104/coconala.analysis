@@ -1,0 +1,12 @@
+{
+  "name": "coconala-url-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "APIなしでココナラ公開ページを構造化する分析MVP",
+  "type": "module",
+  "scripts": {
+    "analyze": "node coconala-analyzer.mjs",
+    "start": "node server.mjs",
+    "check": "node --check coconala-analyzer.mjs && node --check cdp-bridge.mjs && node --check logged-in-analytics.mjs && node --check server.mjs && node --check app.mjs"
+  }
+}
